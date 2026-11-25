@@ -1,6 +1,10 @@
 # Angular front ends. Linter: qodana-js, set in each repository's own qodana.yaml.
-# The scan needs node_modules: install the dependencies in the workflow before it runs, otherwise the
-# Angular plugin cannot read the Angular version and reports valid templates as errors.
+# The scan needs node_modules, otherwise the Angular plugin cannot read the Angular version and reports
+# valid templates as errors. The repository's scripts/qodana-bootstrap.sh (see the base) installs them
+# inside the linter's container (Node 22 in the 2026.3 image): `npm ci --ignore-scripts` for the root and
+# each package with its own lockfile, run with the npm version from package.json's `packageManager`
+# through `npx --yes npm@<version>` when the lockfile needs a newer npm than the image's. Keep install
+# scripts off: the container holds the Qodana Cloud token.
 
 version: "1.0"
 

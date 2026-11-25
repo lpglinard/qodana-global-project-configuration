@@ -6,8 +6,6 @@ version: "1.0"
 
 imports:
   - ../base/qodana.yaml
-
-# Fetches the packages before the analysis. It needs Flutter on PATH, so the scan has to run in native
-# mode (--within-docker false in the workflow arguments): the linter's Docker image ships no Flutter SDK.
-# A repository that sets its own bootstrap replaces this command entirely.
-bootstrap: flutter pub get
+# The repository's scripts/qodana-bootstrap.sh (see the base) fetches the packages: `flutter pub get`.
+# It needs Flutter on PATH, so the scan has to run in native mode (--within-docker false in the workflow
+# arguments): the linter's Docker image ships no Flutter SDK.
