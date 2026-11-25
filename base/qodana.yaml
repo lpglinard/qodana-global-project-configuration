@@ -1,26 +1,14 @@
-version: 1.0
+# Defaults shared by every stack configuration. Each stack file imports this one.
+# Do not store sensitive information here: the contents end up in the Qodana report of every project.
+# Rules for editing shared files are in the README.
 
-failureConditions:
-  severityThresholds:
-    critical: 0
+version: "1.0"
 
 profile:
-  groups:
-    - groupId: Security
-      groups:
-        - "category:Java/Security"
-        - "category:Security"
-
+  # Without a profile name Qodana falls back to qodana.starter, which runs fewer inspections.
+  name: qodana.recommended
   inspections:
-    - group: Security
-      enabled: true
-
-    - inspection: CheckDependencyLicenses
-      enabled: true
-      options:
-        usePackageSearch: true
-
-    - inspection: HardcodedPasswords
-      enabled: true
-      options:
-        reportDefaultSuspiciousVariableNames: true
+    # Documentation is not application code.
+    - group: ALL
+      ignore:
+        - "docs/**"

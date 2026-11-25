@@ -1,0 +1,26 @@
+# Angular front ends. Linter: qodana-js, set in each repository's own qodana.yaml.
+# The scan needs node_modules: install the dependencies in the workflow before it runs, otherwise the
+# Angular plugin cannot read the Angular version and reports valid templates as errors.
+
+version: "1.0"
+
+imports:
+  - ../base/qodana.yaml
+
+profile:
+  inspections:
+    # Build, cache and test output is not application code.
+    - group: ALL
+      ignore:
+        - "dist/**"
+        - "coverage/**"
+        - ".angular/**"
+        - "test-results/**"
+        - "playwright-report/**"
+
+# Turns off the Angular plugin's service-powered type engine. With it on, unchanged code gets a different
+# set of false positives on every run (two-way bindings to a readonly signal() or model() reported as
+# "Attempt to assign to const or readonly variable"). Upstream bug: WEB-78352. Template types are still
+# checked by the Angular build. Remove once the bug is fixed in the linter.
+properties:
+  angular.service.powered.type.engine.enabled.by.default: "false"

@@ -1,11 +1,19 @@
-configurations:
-  - id: team_a
-    name: Team A
-    description: Configurations used for Team A projects
-    qodanaYaml: teamA/qodana.yaml
+# The configurations a Qodana Cloud project can be connected to. base/qodana.yaml is not listed:
+# it is imported by every configuration below and uploaded as part of each one.
+# An id identifies the configuration in Qodana Cloud: do not rename one that has projects connected.
 
-  - id: team_b
-    name: Team B
-    description: Configurations used for Team B projects
-    qodanaYaml: teamB/qodana.yaml
-        
+configurations:
+  - id: java_quarkus
+    name: Java Quarkus
+    description: Java services built with Quarkus (linter qodana-jvm)
+    qodanaYaml: java-quarkus/qodana.yaml
+
+  - id: dart_flutter
+    name: Dart Flutter
+    description: Flutter and Dart applications (linter qodana-poly, native mode)
+    qodanaYaml: dart-flutter/qodana.yaml
+
+  - id: angular
+    name: Angular
+    description: Angular front ends (linter qodana-js)
+    qodanaYaml: angular/qodana.yaml

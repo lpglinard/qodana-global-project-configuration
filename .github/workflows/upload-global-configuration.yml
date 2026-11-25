@@ -1,28 +1,63 @@
-name: Qodana Configuration Upload
+name: Qodana Configuration
 
+# A pull request only validates. Nothing is uploaded until the change is on main: the uploader has no
+# dry-run mode, and an upload reaches every connected project on that project's next scan.
 on:
-    push:
-        branches: [ main, dev ]
     pull_request:
+        branches: [ main ]
+    push:
         branches: [ main ]
     workflow_dispatch:
 
-jobs:
-    upload-qodana-config:
-        runs-on: ubuntu-latest
+permissions:
+    contents: read
 
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
-            - name: Run Qodana Configuration Uploader
+            - name: Set up Java for Qodana's configuration loader
+              uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+              with:
+                  distribution: temurin
+                  java-version: '21'
+
+            - name: Validate the configurations
+              run: bash scripts/validate.sh
+
+    upload:
+        needs: validate
+        # Only from main, and never from a pull request.
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        # One upload at a time and in order: each upload replaces what Qodana Cloud holds.
+        concurrency:
+            group: qodana-configuration-upload
+            cancel-in-progress: false
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
+
+            - name: Upload the configurations to Qodana Cloud
               env:
                   QODANA_CONFIGURATIONS_TOKEN: ${{ secrets.QODANA_CONFIGURATIONS_TOKEN }}
+                  # The image has a single moving tag, latest, so it is pinned by digest. To update it,
+                  # run `docker pull jetbrains/qodana-configuration-uploader:latest` and copy the digest.
+                  UPLOADER_IMAGE: jetbrains/qodana-configuration-uploader@sha256:f4786ceea616048c3401cf0b0345d2220d22a2ec7b046fd48cbbfc522e6efe30
               run: |
                   docker run --rm \
-                    -v $(pwd):/workspace \
+                    -v "$PWD":/workspace \
                     -w /workspace \
-                    -e QODANA_CONFIGURATIONS_TOKEN=$QODANA_CONFIGURATIONS_TOKEN \
-                    jetbrains/qodana-configuration-uploader:latest \
+                    -e QODANA_CONFIGURATIONS_TOKEN \
+                    "$UPLOADER_IMAGE" \
                     --global-configs-file qodana-global-configurations.yaml \
-                    --qodana-host https://qodana.cloud
+                    --qodana-endpoint https://qodana.cloud
