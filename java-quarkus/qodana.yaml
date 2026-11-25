@@ -1,0 +1,11 @@
+# Java services built with Quarkus. Linter: qodana-jvm, set in each repository's own qodana.yaml.
+
+version: "1.0"
+
+imports:
+  - ../base/qodana.yaml
+
+# The Quarkus plugin is not bundled with qodana-jvm. Without it the CDI inspections do not understand
+# Quarkus build-time injection and report legitimate beans as unsatisfied or ambiguous.
+plugins:
+  - id: com.intellij.quarkus

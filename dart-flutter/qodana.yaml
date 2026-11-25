@@ -1,0 +1,13 @@
+# Flutter and Dart applications. Linter: qodana-poly, set in each repository's own qodana.yaml.
+# Dart rules and Dart exclusions are not configured here: the analysis follows the repository's
+# analysis_options.yaml.
+
+version: "1.0"
+
+imports:
+  - ../base/qodana.yaml
+
+# Fetches the packages before the analysis. It needs Flutter on PATH, so the scan has to run in native
+# mode (--within-docker false in the workflow arguments): the linter's Docker image ships no Flutter SDK.
+# A repository that sets its own bootstrap replaces this command entirely.
+bootstrap: flutter pub get
