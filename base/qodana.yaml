@@ -12,3 +12,12 @@ profile:
     - group: ALL
       ignore:
         - "docs/**"
+
+# Whatever a repository needs before the analysis (dependencies, the coverage report its test jobs
+# produced) is done by its own scripts/qodana-bootstrap.sh, so every repository and stack calls it the
+# same way and the CI job stays the same everywhere. The script runs where the linter runs: inside the
+# linter's container in Docker mode, on the runner in native mode. A failing script stops the scan, and
+# so does a missing one: add the script before connecting a repository to a configuration. Repeat this
+# line in the repository's own qodana.yaml, because a scan that cannot load the global configuration
+# continues without it.
+bootstrap: sh scripts/qodana-bootstrap.sh

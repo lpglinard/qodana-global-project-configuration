@@ -55,9 +55,21 @@ the base.
 - A `qodana.yaml` with `version`, `linter` and `profile.name: qodana.recommended`. Keep the profile name even though
   the base sets it: when a scan cannot load the global configuration it continues with the repository's file alone
   and reports success, and without a profile name it would run the smaller `qodana.starter` profile.
+- `bootstrap: sh scripts/qodana-bootstrap.sh`, the same line the base sets, repeated for the same reason as the
+  profile name.
+- `scripts/qodana-bootstrap.sh`: everything the repository needs before the analysis. Every stack needs some
+  preparation, and only this script differs between them: installing the npm packages for Angular,
+  `flutter pub get` for Flutter, putting the JaCoCo report where Qodana reads it for Quarkus. It runs where the
+  linter runs (inside the linter's container in Docker mode, on the runner in native mode), and a failing script
+  stops the scan. Keep it POSIX `sh`, since the linter image's `/bin/sh` is not bash. In Docker mode the
+  container holds the Qodana Cloud token, so do not run code there that the analysis does not need, such as
+  npm install scripts.
 - Exclusions that name the repository's own paths, and its documented false positives.
-- The workflow: dependency installation, tests and coverage, the Qodana token, triggers, and native mode
-  (`--within-docker false`) for Flutter.
+- The workflow: the tests, in their own jobs, each keeping its coverage report as an artifact; the Qodana job,
+  which only checks out the code, downloads those artifacts into the checkout (into a git-ignored folder, since
+  quick-fixes commit with `git add .`) and runs the scan; the Qodana token, triggers, and native mode
+  (`--within-docker false`) for Flutter. Tests stay out of the script: inside the linter's container there is
+  no Docker daemon for Dev Services or Testcontainers, and a failing test would stop the analysis too.
 
 ## Changing a configuration
 
